@@ -1,39 +1,36 @@
-import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
+import { useState, type ReactNode } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import Header from './components/Header';
 import Login from './pages/Login';
 import Admision from './pages/Admision';
 import Rastreo from './pages/Rastreo';
+import Logistica from './pages/Logistica';
 import type { UsuarioSesion } from './types/serpost';
 
-function Layout({ children }: { children: React.ReactNode }) {
-  const navigate = useNavigate();
+function leerUsuario(): UsuarioSesion | null {
   const raw = localStorage.getItem('serpost_user');
-  const user: UsuarioSesion | null = raw ? JSON.parse(raw) : null;
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as UsuarioSesion;
+  } catch {
+    return null;
+  }
+}
 
-  if (!user) return <Navigate to="/login" replace />;
+function Layout({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<UsuarioSesion | null>(() => leerUsuario());
 
   const logout = () => {
     localStorage.removeItem('serpost_user');
+    setUser(null);
     navigate('/login');
   };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
-      <header className="bg-blue-900 text-white px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <span className="font-bold tracking-wide">SERPOST</span>
-          <nav className="flex gap-4 text-sm">
-            <Link to="/admision" className="hover:underline">Admisión de Envíos</Link>
-            <Link to="/rastreo" className="hover:underline">Rastreo / Tracking</Link>
-          </nav>
-        </div>
-        <div className="flex items-center gap-3 text-xs">
-          <span className="bg-blue-800 px-2 py-1 rounded">{user.nombre} ({user.rol})</span>
-          <button onClick={logout} className="underline hover:text-slate-200 cursor-pointer">
-            Salir
-          </button>
-        </div>
-      </header>
-      <main className="max-w-4xl mx-auto p-6">{children}</main>
+      <Header user={user} onLogout={logout} />
+      <main className="max-w-5xl mx-auto p-6">{children}</main>
     </div>
   );
 }
@@ -45,6 +42,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/admision" element={<Layout><Admision /></Layout>} />
         <Route path="/rastreo" element={<Layout><Rastreo /></Layout>} />
+        <Route path="/logistica" element={<Layout><Logistica /></Layout>} />
         <Route path="*" element={<Navigate to="/admision" replace />} />
       </Routes>
     </BrowserRouter>
