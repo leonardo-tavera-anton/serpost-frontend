@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
-import Login from './pages/login';
-import Admision from './pages/admision';
+import Login from './pages/Login';
+import Admision from './pages/Admision';
 import Rastreo from './pages/Rastreo';
 import type { UsuarioSesion } from './types/serpost';
 
